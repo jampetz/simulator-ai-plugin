@@ -96,7 +96,7 @@ git tag vX.Y.Z
 git push origin vX.Y.Z
 ```
 
-The `release.yml` workflow fires automatically on any `v*` tag. It cross-compiles the MCP server for `darwin/linux × amd64/arm64`, generates SHA-256 checksums, attests build provenance, regenerates `public/` via `make discovery`, and creates a GitHub Release whose body is the matching `CHANGELOG.md` section. `POWER.md` is attached to every Release so kiro.dev/powers can resolve the Power manifest from the tag — Kiro users install via the clone path described below; there is no pre-built `.kiro/` zip artifact (a release-only overlay would still need a post-extract step to resolve the `$CLAUDE_PLUGIN_ROOT` token, so the clone path is the only correct flow today).
+The `release.yml` workflow fires automatically on any `v*` tag. It cross-compiles the MCP server for `darwin/linux × amd64/arm64`, generates SHA-256 checksums, attests build provenance, regenerates `public/` via `make discovery`, and creates a GitHub Release whose body is the matching `CHANGELOG.md` section. `POWER.md` is attached to every Release so kiro.dev/powers can resolve the Power manifest from the tag — Kiro users install via the clone path described below; there is no *pre-built* `.kiro/` zip artifact attached to the Release (a release-only overlay would still need a post-extract step to resolve the `$CLAUDE_PLUGIN_ROOT` token). `install-kiro.sh --power` / `--install-power` build that overlay locally instead, from whatever clone/tag the user has checked out — see below.
 
 ## 7. Install from GitHub
 
@@ -133,6 +133,16 @@ The script hard-copies the skills into the workspace and resolves the
 Kiro does no token substitution on its own, so this install-time resolve
 step is required. The script is idempotent; re-run it after a `git pull`
 to refresh the workspace overlay.
+
+By default this same invocation also builds a portable Power bundle and
+installs it into `~/.kiro/powers/`, registering the plugin as a Kiro Power
+globally rather than just in one workspace. Drive either half standalone with
+`install-kiro.sh --power [output-dir]` (build only) or `install-kiro.sh
+--install-power` (build + register locally, skipping the workspace step).
+The bundle's `mcp.json` still resolves back to this clone's absolute
+`mcp-server/` path — the MCP server payload itself doesn't travel inside the
+bundle, so it isn't portable to a different machine's clone, only to a
+different Kiro instance on this one.
 
 To list this Power on **kiro.dev/powers**, submit the release tag URL to the
 Kiro Power registry. `POWER.md` is attached to every GitHub Release so the

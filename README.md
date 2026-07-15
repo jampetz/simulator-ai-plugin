@@ -90,10 +90,22 @@ Kiro has no marketplace command and does not resolve the `$CLAUDE_PLUGIN_ROOT` t
 ```bash
 git clone https://github.com/corezoid/simulator-ai-plugin
 cd simulator-ai-plugin
-sh plugins/simulator/scripts/install-kiro.sh .   # installs into the current dir; pass another workspace-dir instead of `.` to target elsewhere
+sh plugins/simulator/scripts/install-kiro.sh .   # installs into the current dir (pass another workspace-dir instead of `.` to target elsewhere) AND registers the plugin as a Kiro Power globally
 ```
 
-This writes the MCP entry to `<workspace>/.kiro/settings/mcp.json` with the plugin path resolved to an absolute path (no reliance on `KIRO_PLUGIN_ROOT` or workspace layout), symlinks the steering file into `.kiro/steering/`, and hard-copies each skill into `.kiro/skills/<name>/` with `$CLAUDE_PLUGIN_ROOT` replaced the same way. Open the workspace in Kiro and the MCP server, skills, and steering are picked up automatically. `.mcp.kiro.json` also self-heals if Kiro loads it directly without the script ever having run — it probes for `mcp-server/run.sh` next to its workspace-root guess and falls back to `plugins/simulator/` when that guess misses. The plugin is also published to [kiro.dev/powers](https://kiro.dev/powers) — see [`POWER.md`](POWER.md).
+This does two things in one run:
+
+1. **Workspace overlay.** Writes the MCP entry to `<workspace>/.kiro/settings/mcp.json` with the plugin path resolved to an absolute path (no reliance on `KIRO_PLUGIN_ROOT` or workspace layout), symlinks the steering file into `.kiro/steering/`, and hard-copies each skill into `.kiro/skills/<name>/` with `$CLAUDE_PLUGIN_ROOT` replaced the same way. Open the workspace in Kiro and the MCP server, skills, and steering are picked up automatically. `.mcp.kiro.json` also self-heals if Kiro loads it directly without the script ever having run — it probes for `mcp-server/run.sh` next to its workspace-root guess and falls back to `plugins/simulator/` when that guess misses.
+2. **Global Power registration.** Builds a Kiro Power bundle and installs it into `~/.kiro/powers/` (restart Kiro afterwards to pick it up), so the plugin is available as a Power in *every* workspace, not just the one above. The plugin is also published to [kiro.dev/powers](https://kiro.dev/powers) — see [`POWER.md`](POWER.md).
+
+To drive either half on its own instead of both together:
+
+```bash
+plugins/simulator/scripts/install-kiro.sh --power [output-dir]     # just build a portable bundle (default: power-simulator/), no install
+plugins/simulator/scripts/install-kiro.sh --install-power          # just build + register it in this machine's local Kiro, skip the workspace step
+```
+
+The bundle's `POWER.md`, `mcp.json`, and one steering file per skill are regenerated from scratch every run — `mcp.json` still resolves back to this exact clone's absolute `mcp-server/` path (the actual server payload doesn't travel inside the bundle), so the Power stays tied to this clone, same as workspace-install mode.
 
 ### Updating
 

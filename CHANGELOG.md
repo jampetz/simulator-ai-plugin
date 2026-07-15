@@ -6,6 +6,9 @@
 
 ## [Unreleased]
 
+### Added
+- **`install-kiro.sh --power` / `--install-power`.** The Kiro installer can now build a portable Kiro Power bundle (`POWER.md` + `mcp.json` + one steering file per skill, default output `power-simulator/`) and install it directly into this machine's local Kiro (`~/.kiro/powers/`), registering the plugin as a Power globally instead of per-workspace. Plain `install-kiro.sh <workspace-dir>` now also runs the global Power install by default. The bundle's `mcp.json` resolves to this clone's absolute `mcp-server/` path rather than a portable runtime probe, since the actual MCP server payload doesn't travel inside a Kiro-imported bundle. Reads (never writes) the plugin version — `make release` still owns bumping it across the six manifests.
+
 ## [2.5.0] - 2026-07-14
 
 ### Added
